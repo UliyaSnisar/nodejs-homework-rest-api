@@ -13,11 +13,13 @@ const {
     updateSubscription,
     userStarter,
     userPro,
-    userBusiness} = require('../../controllers/usersControllers')
+    userBusiness,
+    uploadAvatar, } = require('../../controllers/usersControllers')
 const guard = require('../../helpers/guard')
 const loginLimit = require('../../helpers/rate-limit-login')
 const { Subscription } = require('../../config/constants')
 const role = require('../../helpers/role')
+const upload = require('../../helpers/uploads')
 
 router.patch('/', guard, validateSubscriptionUser, updateSubscription)
 router.get('/starter', guard, role(Subscription.STARTER), userStarter)
@@ -27,6 +29,7 @@ router.post('/signup', validateSignupUser, signup)
 router.post('/login', loginLimit, schemaLoginUser, login)
 router.post('/logout', guard, logout)
 router.get('/current', guard, current)
+router.patch('/avatar', guard, upload.single('avatarUrl'), uploadAvatar)
 
 
 module.exports = router

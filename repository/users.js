@@ -1,6 +1,5 @@
 const User = require('../model/user')
 
-
 const findById = async (id) => {
     return await User.findById(id)
 }
@@ -18,10 +17,15 @@ const updateToken = async (id, token) => {
     return await User.updateOne({_id: id}, {token})
 }
 
+const updateAvatar = async (id, avatarURL, idUserCloud = null) => {
+    return await User.updateOne({_id: id}, {avatarURL, idUserCloud})
+}
+
 
 module.exports = {
     findByEmail,
     create,
     updateToken,
     findById,
+    updateAvatar,
 }

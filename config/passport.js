@@ -10,8 +10,8 @@ const params = {
 }
     
 passport.use(new Strategy(params, async (payload, done) => {
-    const user = await Users.findById(payload.id)
     try {
+        const user = await Users.findById(payload.id)
         if (!user) {
             return done(new Error('User not found'), false)
         }

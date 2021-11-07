@@ -1,7 +1,7 @@
 const Contacts = require('../repository/contacts')
 const {CustomError} = require('../helpers/customError')
 
-const getContacts = async (req, res, ) => {
+const getContacts = async (req, res) => {
     const userId = req.user._id
     const data = await Contacts.listContacts(userId, req.query)
     res.json({ status: 'success', code: 200, data: { ...data } })
