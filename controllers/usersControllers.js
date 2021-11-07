@@ -6,8 +6,11 @@ const Users = require('../repository/users')
 // const UploadService = require('../services/file-upload')
 const UploadService = require('../services/cloud-upload')
 const { HttpCode, Subscription } = require('../config/constants')
+const EmailService = require('../services/email/service')
+const {CreateSenderSendGrid, CreateSenderNodemailer,} = require('../services/email/sender')
 require('dotenv').config()
 const { CustomError } = require('../helpers/customError');
+const User = require('../model/user')
 const SECRET_KEY = process.env.JWT_SECRET_KEY
 
 
@@ -22,15 +25,29 @@ const signup = async (req, res, next) => {
         })
     }
     try {
+        // TODO: Send email for verify users
+
         const newUser = await Users.create({ email, password, subscription })
+        const emailService = new EmailService(
+            process.env.NODE_ENV,
+            new CreateSenderSendGrid()
+        )
+        const statusEmail = await emailService.sendVerifyEmail(
+            newUser.email,
+            newUser.name,
+            newUser.verifyToken,
+        )
+        
         return res.status(HttpCode.CREATED).json({
                 status: 'success',
                 code: HttpCode.CREATED,
                 data: {
                     id: newUser.id,
+                    name: newUser.name,
                     email: newUser.email,
                     subscription: newUser.subscription,
                     avatar: newUser.avatarUrl,
+                    successEmail: statusEmail,
                 },
             })
     } catch (error) {
@@ -43,7 +60,7 @@ const login = async (req, res, _next) => {
     const user = await Users.findByEmail(email)
     const isValidPassword = await user?.isValidPassword(password)
 
-        if (!user || !isValidPassword) {
+        if (!user || !isValidPassword || !user?.isVerified) {
         return res.status(HttpCode.UNAUTHORIZED).json({
                 status: 'error',
                 code: HttpCode.UNAUTHORIZED,
@@ -60,7 +77,7 @@ const login = async (req, res, _next) => {
     status: "success",
     code: HttpCode.OK,
     data: {token},
-  });
+  })
 }
 
 const logout = async (req, res, _next) => {
@@ -175,6 +192,47 @@ const uploadAvatar = async (req, res, next) => {
     })
 }
 
+const verifyUser = async (req, res, _next) => {
+    const user = await Users.findUserByVerifyToken(req.params.token)
+    if (user) {
+        await Users.updateTokenVerify(user._id, true, null)
+        return res.status(HttpCode.OK).json({
+            status: "success",
+            code: HttpCode.OK,
+            data: { message: 'Success' },
+        })
+    }
+
+    return res.status(HttpCode.BAD_REQUEST).json({
+        status: "success",
+        code: HttpCode.BAD_REQUEST,
+        message: 'Invalid token',
+    })
+
+}
+
+const repeadEmailForVerifyUser = async (req, res, next) => {
+    const { email } = req.body
+    const user = await Users.findByEmail(email)
+    if (user) {
+        const {email, name, verifyToken} = user
+        const emailService = new EmailService(
+        process.env.NODE_ENV,
+        new CreateSenderNodemailer()
+        )
+        const statusEmail = await emailService.sendVerifyEmail(
+            email,
+            name,
+            verifyToken,
+        )
+    }
+    return res.status(HttpCode.OK).json({
+        status: "success",
+        code: HttpCode.OK,
+        data: { message: 'Success' },
+    })
+}
+
 module.exports = {
     signup,
     login,
@@ -185,4 +243,6 @@ module.exports = {
     userPro,
     userBusiness,
     uploadAvatar,
+    verifyUser,
+    repeadEmailForVerifyUser,
 }
