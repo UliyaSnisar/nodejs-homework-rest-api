@@ -35,7 +35,7 @@ const validate = async (schema, obj, res, next) => {
 };
 
 module.exports.validateSignupUser = async (req, res, next) => {
-  return await validate(validateSignupUser, req.body, res, next);
+  return await validate(schemaSignupUser, req.body, res, next);
 };
 
 module.exports.schemaLoginUser = async (req, res, next) => {

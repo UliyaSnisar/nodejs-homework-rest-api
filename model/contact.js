@@ -42,7 +42,7 @@ const contactSchema = new Schema({
 )
 
 contactSchema.virtual("fullname").get(function () {
-  return `${this.name} ${this.surname}`;
+  return `${this.name}`;
 });
 
 contactSchema.plugin(mongoosePaginate);

@@ -13,7 +13,6 @@ const {
     validateId,
     validateStatusContact } = require('./validation')
 const guard = require('../../helpers/guard')
-const role = require('../../helpers/role')
 const wrapError = require('../../helpers/errorHandler')
 
 router.get('/', guard, wrapError(getContacts)) 

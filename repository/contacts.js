@@ -39,30 +39,26 @@ const listContacts = async (userId, query) => {
 }
 
 const getContactById = async (contactId, userId) => {
-  const result = await Contact.findOne({ _id: contactId, owner: userId }).populate({
+  return await Contact.findOne({ _id: contactId, owner: userId }).populate({
     path: 'owner',
     select: 'email subscription createdAt updatedAt'
   })
-  return result
 }
 
 const removeContact = async (contactId, userId) => {
-  const result = await Contact.findOneAndRemove({_id: contactId, owner: userId})
-  return result
+  return await Contact.findOneAndRemove({_id: contactId, owner: userId})
 }
 
 const addContact = async (body) => {
-  const result = await Contact.create(body)
-  return result
+  return await Contact.create(body)
 }
 
 const updateContact = async (contactId, body, userId) => {
-  const result = await Contact.findOneAndUpdate(
+  return await Contact.findOneAndUpdate(
     {_id: contactId, owner: userId},
     { ...body },
     {new: true},
   )
-  return result
 }
 
 module.exports = {
